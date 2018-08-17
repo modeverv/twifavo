@@ -16,7 +16,7 @@
 
     <div class="card" style="margin-bottom:1em;" v-for='(favo,i) in favos'>
       <div class="form-row align-items-center card-body">
-        <div class="col-auto" style="width:5em;">
+        <div class="col-auto" style="max-width:7em;">
           <select 
             class="form-control" 
             v-on:change="changeTag(event,i)"
@@ -33,7 +33,7 @@
         <div class="col-auto">
           <input 
           class="form-control" 
-          style="width:5em;"
+          style="max-width:6em;"
           type="text"
           v-model="newTag[i]"
           />
@@ -44,6 +44,7 @@
       </div>
       <div class="card-body">
         <p class="card-text">{{favo.body.text}}</p>
+        <p class="card-text text-muted">{{ new Date( favo.created_at * 1000 ).toLocaleString('ja-JP') }}</p>
       </div>
       <span v-if="favo.body.extended_entities">
       <span v-for="media in favo.body.extended_entities.media">
@@ -71,7 +72,7 @@ export default {
       favos: [],
       se: "",
       newTag: [],
-      selectTag: [],
+      selectTag: []
     };
   },
   computed: {
@@ -107,11 +108,11 @@ export default {
         .get("https://tw.lovesaemi.daemon.asia/getfavo.php" + q)
         .then(response => {
           this.newTag = [];
-          this.selectTag = [];          
+          this.selectTag = [];
           this.favos = response.data;
-          for(var i=0,l=this.favos.length;i<l;i++){
+          for (var i = 0, l = this.favos.length; i < l; i++) {
             this.newTag.push(this.favos[i].tag);
-            this.selectTag.push(this.favos[i].tag);            
+            this.selectTag.push(this.favos[i].tag);
           }
         });
     },
@@ -119,13 +120,13 @@ export default {
       //alert(8)
       this.se = event.target.value;
     },
-    changeTag: function(event,i){
+    changeTag: function(event, i) {
       this.newTag[i] = "";
       this.selectTag[i] = event.target.value;
     },
-    updateTag: function(id,i) {
-      var tagForUpdate = this.newTag[i];      
-      if(this.newTag[i] == ""){
+    updateTag: function(id, i) {
+      var tagForUpdate = this.newTag[i];
+      if (this.newTag[i] == "") {
         tagForUpdate = this.selectTag[i];
       }
       axios
@@ -159,8 +160,8 @@ export default {
   font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
+  /*text-align: center;*/
   color: #2c3e50;
-  margin-top: 60px;
+  /*  margin-top: 60px;*/
 }
 </style>
