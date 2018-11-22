@@ -122,11 +122,14 @@ export default {
       }
       return q;
     },
+    setNow2Old: function(){
+      if(this.se_old != this.se){
+        this.se_old = this.se;
+      }
+    },
     setOrResetFavos: function(){
       if(this.se_old != this.se){
         this.favos.splice(0,this.favos.length);
-        // 副作用
-        this.se_old = this.se;
       }
     },
     getFavo: function() {
@@ -142,6 +145,7 @@ export default {
               this.newTag = [];
               this.selectTag = [];
               this.setOrResetFavos();
+              this.setNow2Old();
               for (var i = 0, l = response.data.length; i < l; i++) {
                 this.favos.push(response.data[i]);
               }
