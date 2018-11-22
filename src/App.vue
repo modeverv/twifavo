@@ -73,6 +73,7 @@ export default {
       tags: [],
       favos: [],
       se: "",
+      se_old: "",
       newTag: [],
       selectTag: [],
       loading: false
@@ -101,14 +102,36 @@ export default {
     }
   },
   methods: {
-    getFavo: function() {
+    getOffset: function(){
+      var offset = 0;
+      if(this.se_old != this.se){
+        offset = 0;
+      }else{
+        offset = this.favos.length;
+      }
+      return offset;
+    },
+    getQ:function(){
       var se = this.se;
       var q = "";
+      var offset = this.getOffset();
       if (se) {
-        q = "?tag=" + se + "&offset=" + this.favos.length;
+        q = "?tag=" + se + "&offset=" + offset;
       }else {
-        q = "?offset=" + this.favos.length;
+        q = "?offset=" + offset;
       }
+      return q;
+    },
+    setOrResetFavos: function(){
+      if(this.se_old != this.se){
+        this.favos.splice(0,this.favos.length);
+        // 副作用
+        this.se_old = this.se;
+      }
+    },
+    getFavo: function() {
+      var q = this.getQ();
+      console.log(q);
       if(!this.loading){
         this.loading = true;
         axios
@@ -118,6 +141,7 @@ export default {
               this.loading = false;
               this.newTag = [];
               this.selectTag = [];
+              this.setOrResetFavos();
               for (var i = 0, l = response.data.length; i < l; i++) {
                 this.favos.push(response.data[i]);
               }
@@ -129,6 +153,7 @@ export default {
       }
     },
     changeKey: function(event) {
+      this.se_old = this.se
       this.se = event.target.value;
     },
     changeTag: function(event, i) {
