@@ -74,7 +74,8 @@ export default {
       favos: [],
       se: "",
       newTag: [],
-      selectTag: []
+      selectTag: [],
+      loading: false
     };
   },
   computed: {
@@ -104,19 +105,28 @@ export default {
       var se = this.se;
       var q = "";
       if (se) {
-        q = "?tag=" + se;
+        q = "?tag=" + se + "&offset=" + this.favos.length;
+      }else {
+        q = "?offset=" + this.favos.length;
       }
-      axios
-        .get("https://tw.lovesaemi.daemon.asia/getfavo.php" + q)
-        .then(response => {
-          this.newTag = [];
-          this.selectTag = [];
-          this.favos = response.data;
-          for (var i = 0, l = this.favos.length; i < l; i++) {
-            this.newTag.push(this.favos[i].tag);
-            this.selectTag.push(this.favos[i].tag);
-          }
-        });
+      if(!this.loading){
+        this.loading = true;
+        axios
+            .get("https://tw.lovesaemi.daemon.asia/getfavo_v2.php" + q)
+            .then(response => {
+              console.log(response.data);
+              this.loading = false;
+              this.newTag = [];
+              this.selectTag = [];
+              for (var i = 0, l = response.data.length; i < l; i++) {
+                this.favos.push(response.data[i]);
+              }
+              for (var i = 0, l = this.favos.length; i < l; i++) {
+                this.newTag.push(this.favos[i].tag);
+                this.selectTag.push(this.favos[i].tag);
+              }
+            });
+      }
     },
     changeKey: function(event) {
       this.se = event.target.value;
@@ -152,6 +162,14 @@ export default {
       this.tags = response.data;
     });
     this.getFavo();
+    var this_ = this;
+    window.addEventListener('scroll', function(event){
+      var scrollTop = window.pageYOffset;
+      var height = Math.max.apply( null, [document.body.clientHeight , document.body.scrollHeight, document.documentElement.scrollHeight, document.documentElement.clientHeight] ) - 2000;  
+      if (scrollTop >= height) {
+        this_.getFavo();
+      }
+    });
   }
 };
 </script>
