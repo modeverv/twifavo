@@ -1,44 +1,25 @@
 <template>
   <div id="app" class="container-fluid">
     <h1>お気に入り</h1>
-    <select 
-      class="form-control" 
-      style="margin-bottom:1em"
-      v-on:change="changeKey"
-      >
-      <option 
-        v-for='option in selecttags'
-        v-bind:value="option.value"
-        >
+    <select class="form-control" style="margin-bottom:1em" v-on:change="changeKey">
+      <option v-for='option in selecttags' v-bind:value="option.value" v-bind:key="option.id">
         {{ option.key }}
       </option>
     </select>
     <div v-if="favos.length == 0">
-    	 <div class="loader">Loading...</div>
+      <div class="loader">Loading...</div>
     </div>
-    <div class="card" style="margin-bottom:1em;" v-for='(favo,i) in favos'>
+    <div class="card" style="margin-bottom:1em;" v-for='(favo,i) in favos' v-bind:key="favo.id">
       <div class="form-row align-items-center card-body">
         <div class="col-auto" style="max-width:7em;">
-          <select 
-            class="form-control" 
-            v-on:change="changeTag(event,i)"
-            v-model="selectTag[i]"
-            >
-            <option 
-              v-for='option in inputtags'
-              v-bind:value="option.value"
-              >
+          <select class="form-control" v-on:change="changeTag($event,i)" v-model="selectTag[i]">
+            <option v-for='option in inputtags' v-bind:value="option.value" v-bind:key="option.id">
               {{ option.key }}
             </option>
           </select>
         </div>
         <div class="col-auto">
-          <input 
-          class="form-control" 
-          style="max-width:6em;"
-          type="text"
-          v-model="newTag[i]"
-          />
+          <input class="form-control" style="max-width:6em;" type="text" v-model="newTag[i]" />
         </div>
         <div class="col-auto">
           <button class="btn btn-primary" v-on:click="updateTag(favo.id_str,i)">Set</button>
@@ -49,7 +30,7 @@
         <p class="card-text text-muted">{{ new Date( favo.created_at * 1000 ).toLocaleString('ja-JP') }}</p>
       </div>
       <span v-if="favo.body.extended_entities">
-      <span v-for="media in favo.body.extended_entities.media">
+      <span v-for="media in favo.body.extended_entities.media" v-bind:key="media.id">
         <span v-if="media.type == 'photo'">
           <img class="card-img-top" v-bind:src="media.media_url_https">
         </span>
@@ -63,144 +44,143 @@
 </template>
 
 <script>
-//import HelloWorld from './components/HelloWorld'
-import axios from "axios";
+// import HelloWorld from './components/HelloWorld'
+import axios from 'axios'
 
 export default {
-  name: "App",
-  data: function() {
+  name: 'App',
+  data: function () {
     return {
       tags: [],
       favos: [],
-      se: "",
-      se_old: "",
+      se: '',
+      se_old: '',
       newTag: [],
       selectTag: [],
       loading: false
-    };
+    }
   },
   computed: {
-    selecttags: function() {
-      var a = [];
-      a.push({ key: "全て", value: "" });
+    selecttags: function () {
+      var a = []
+      a.push({ key: '全て', value: '' })
       for (var i = 0, l = this.tags.length; i < l; i++) {
-        a.push({ key: this.tags[i], value: this.tags[i] });
+        a.push({ key: this.tags[i], value: this.tags[i] })
       }
-      return a;
+      return a
     },
-    inputtags: function() {
-      var a = [];
+    inputtags: function () {
+      var a = ['']
       for (var i = 0, l = this.tags.length; i < l; i++) {
-        a.push({ key: this.tags[i], value: this.tags[i] });
+        a.push({ key: this.tags[i], value: this.tags[i] })
       }
-      return a;
+      return a
     }
   },
   watch: {
-    se: function() {
-      this.getFavo();
+    se: function () {
+      this.getFavo()
     }
   },
   methods: {
-    getOffset: function(){
-      var offset = 0;
-      if(this.se_old != this.se){
-        offset = 0;
-      }else{
-        offset = this.favos.length;
+    _getOffset: function () {
+      var offset = 0
+      if (this.se_old !== this.se) {
+        offset = 0
+      } else {
+        offset = this.favos.length
       }
-      return offset;
+      return offset
     },
-    getQ:function(){
-      var se = this.se;
-      var q = "";
-      var offset = this.getOffset();
+    _getQ: function () {
+      var se = this.se
+      var q = ''
+      var offset = this._getOffset()
       if (se) {
-        q = "?tag=" + se + "&offset=" + offset;
-      }else {
-        q = "?offset=" + offset;
+        q = '?tag=' + se + '&offset=' + offset
+      } else {
+        q = '?offset=' + offset
       }
-      return q;
+      return q
     },
-    setNow2Old: function(){
-      if(this.se_old != this.se){
-        this.se_old = this.se;
-      }
-    },
-    setOrResetFavos: function(){
-      if(this.se_old != this.se){
-        this.favos.splice(0,this.favos.length);
+    _setNow2Old: function () {
+      if (this.se_old !== this.se) {
+        this.se_old = this.se
       }
     },
-    getFavo: function() {
-      var q = this.getQ();
-      console.log(q);
-      if(!this.loading){
-        this.loading = true;
+    _setOrResetFavos: function () {
+      if (this.se_old !== this.se) {
+        this.favos.splice(0, this.favos.length)
+      }
+    },
+    getFavo: function () {
+      var q = this._getQ()
+      if (!this.loading) {
+        this.loading = true
         axios
-            .get("https://tw.lovesaemi.daemon.asia/getfavo_v2.php" + q)
-            .then(response => {
-              console.log(response.data);
-              this.loading = false;
-              this.newTag = [];
-              this.selectTag = [];
-              this.setOrResetFavos();
-              this.setNow2Old();
-              for (var i = 0, l = response.data.length; i < l; i++) {
-                this.favos.push(response.data[i]);
-              }
-              for (var i = 0, l = this.favos.length; i < l; i++) {
-                this.newTag.push(this.favos[i].tag);
-                this.selectTag.push(this.favos[i].tag);
-              }
-            });
+          .get('https://tw.lovesaemi.daemon.asia/getfavo_v2.php' + q)
+          .then(response => {
+            this.loading = false
+            this.newTag = []
+            this.selectTag = []
+            this._setOrResetFavos()
+            this._setNow2Old()
+            for (var i = 0, l = response.data.length; i < l; i++) {
+              this.favos.push(response.data[i])
+            }
+            for (var x = 0, y = this.favos.length; x < y; x++) {
+              this.newTag.push(this.favos[x].tag)
+              this.selectTag.push(this.favos[x].tag)
+            }
+          })
       }
     },
-    changeKey: function(event) {
+    changeKey: function (event) {
       this.se_old = this.se
-      this.se = event.target.value;
+      this.se = event.target.value
     },
-    changeTag: function(event, i) {
-      this.newTag[i] = "";
-      this.selectTag[i] = event.target.value;
+    changeTag: function (event, i) {
+      this.newTag[i] = ''
+      this.selectTag[i] = event.target.value
     },
-    updateTag: function(id, i) {
-      var tagForUpdate = this.newTag[i];
-      if (this.newTag[i] == "") {
-        tagForUpdate = this.selectTag[i];
+    updateTag: function (id, i) {
+      var tagForUpdate = this.newTag[i]
+      if (this.newTag[i] === '') {
+        tagForUpdate = this.selectTag[i]
       }
       axios
         .get(
-          "https://tw.lovesaemi.daemon.asia/settag.php?id=" +
+          'https://tw.lovesaemi.daemon.asia/settag.php?id=' +
             id +
-            "&tag=" +
+            '&tag=' +
             tagForUpdate
         )
         .then(response => {
           axios
-            .get("https://tw.lovesaemi.daemon.asia/gettag.php")
+            .get('https://tw.lovesaemi.daemon.asia/gettag.php')
             .then(response => {
-              this.tags = response.data;
-              this.getFavo();
-            });
-        });
+              this.tags = response.data
+              this.newTag[i] = tagForUpdate
+              // this.getFavo()
+            })
+        })
     }
   },
-  mounted: function() {
-    axios.get("https://tw.lovesaemi.daemon.asia/gettag.php").then(response => {
-      this.tags = response.data;
-    });
-    this.getFavo();
-    var this_ = this;
-    window.addEventListener('scroll', function(event){
-      var scrollTop = window.pageYOffset;
-      var height = Math.max.apply( null, [document.body.clientHeight , document.body.scrollHeight, document.documentElement.scrollHeight, document.documentElement.clientHeight] ) - 2000;  
+  mounted: function () {
+    axios.get('https://tw.lovesaemi.daemon.asia/gettag.php').then(response => {
+      this.tags = response.data
+    })
+    this.getFavo()
+    var this_ = this
+    window.addEventListener('scroll', function (event) {
+      var scrollTop = window.pageYOffset
+      var height = Math.max.apply(null, [document.body.clientHeight, document.body.scrollHeight, document.documentElement.scrollHeight, document.documentElement.clientHeight]) - 2000
       if (scrollTop >= height) {
-        this_.getFavo();
+        this_.getFavo()
       }
-    });
+    })
   }
-};
+}
 </script>
 
 <style>
