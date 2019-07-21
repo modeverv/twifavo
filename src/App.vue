@@ -64,6 +64,7 @@ export default {
     selecttags: function () {
       var a = []
       a.push({ key: '全て', value: '' })
+      a.push({ key: '未登録', value: '::::NULL::::' })      
       for (var i = 0, l = this.tags.length; i < l; i++) {
         a.push({ key: this.tags[i], value: this.tags[i] })
       }
